@@ -1,39 +1,38 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ShopDomain.Models;
+using Shop.Domain.Models;
 
-namespace ShopApp.Controllers
+namespace Shop.App.Controllers;
+
+// http://localhost:port/api/product
+[ApiController]
+[Route("api/[controller]")]
+public class ProductController : ControllerBase
 {
-    // http://localhost:port/api/product
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductController : ControllerBase
+    private List<Product> _products = new();
+    [HttpGet]
+    public List<Product> GetProducts()
     {
-        private List<Product> _products = new();
-        [HttpGet]
-        public List<Product> GetProducts()
+        _products.Add(new Product()
         {
-            _products.Add(new Product()
-            {
-                Title = "Milk",
-                Price = 40.9f
-            });
-            _products.Add(new Product()
-            {
-                Title = "Bread",
-                Price = 30.5f
-            });
-            return _products;
-        }
+            Title = "Milk",
+            Price = 40.9f
+        });
+        _products.Add(new Product()
+        {
+            Title = "Bread",
+            Price = 30.5f
+        });
+        return _products;
+    }
 
-        [HttpGet("{id}")]
-        public IActionResult GetProductById([FromRoute] int id)
+    [HttpGet("{id}")]
+    public IActionResult GetProductById([FromRoute] int id)
+    {
+        var product = new Product()
         {
-            var product = new Product()
-            {
-                Title = $"Test Product {id}",
-                Price = 100
-            };
-            return Ok(product);
-        }
+            Title = $"Test Product {id}",
+            Price = 100
+        };
+        return Ok(product);
     }
 }

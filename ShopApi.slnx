@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="ShopApp/ShopApp.csproj" />
-  <Project Path="ShopDomain/ShopDomain.csproj" />
+  <Project Path="ShopApp/Shop.App.csproj" />
+  <Project Path="ShopDomain/Shop.Domain.csproj" />
 </Solution>
