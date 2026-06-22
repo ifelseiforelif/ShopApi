@@ -6,3 +6,13 @@ GET {{ShopApp_HostAddress}}/api/product
 
 GET {{ShopApp_HostAddress}}/api/product/33
 Accept: application/json
+
+###
+
+POST {{ShopApp_HostAddress}}/api/product
+Content-Type: application/json
+
+{
+  "title":"Laptop",
+  "price":5600
+}

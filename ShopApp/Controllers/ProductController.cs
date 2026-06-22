@@ -1,28 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shop.App.Interfaces;
 using Shop.Domain.Models;
 
 namespace Shop.App.Controllers;
+//URL - Uniform Resource Locator - текстовий рядок, який вказує
+//на місце розташування ресурса
 
-// http://localhost:port/api/product
 [ApiController]
 [Route("api/[controller]")]
-public class ProductController : ControllerBase
+public class ProductController(IProductService _productService) : ControllerBase
 {
-    private List<Product> _products = new();
+    //private readonly IProductService _productService;
+    //public ProductController(IProductService productService)
+    //{
+    //    _productService = productService;
+    //}
+
+    //EndPoint
     [HttpGet]
     public List<Product> GetProducts()
     {
-        _products.Add(new Product()
-        {
-            Title = "Milk",
-            Price = 40.9f
-        });
-        _products.Add(new Product()
-        {
-            Title = "Bread",
-            Price = 30.5f
-        });
-        return _products;
+        return _productService.GetAllProducts();
     }
 
     [HttpGet("{id}")]
@@ -34,5 +32,12 @@ public class ProductController : ControllerBase
             Price = 100
         };
         return Ok(product);
+    }
+
+    [HttpPost]
+    public IActionResult AddNewProduct([FromBody] Product product)
+    {
+        _productService.AddProduct(product);
+        return Created();
     }
 }

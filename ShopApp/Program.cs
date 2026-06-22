@@ -1,4 +1,7 @@
 
+using Shop.App.Interfaces;
+using Shop.App.Services;
+
 namespace Shop.App;
 
 public class Program
@@ -10,6 +13,8 @@ public class Program
         // Add services to the container.
 
         builder.Services.AddControllers();
+        builder.Services.AddScoped<IProductService, ProductService>();
+
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
 
