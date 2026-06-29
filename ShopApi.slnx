@@ -1,4 +1,5 @@
 <Solution>
-  <Project Path="ShopApp/Shop.App.csproj" />
+  <Project Path="Shop.Infrastructure/Shop.Infrastructure.csproj" Id="aa48872c-e4ef-42c4-b2e5-9f0e57a139fc" />
+  <Project Path="ShopApp/Shop.Api.csproj" />
   <Project Path="ShopDomain/Shop.Domain.csproj" />
 </Solution>

@@ -1,9 +1,9 @@
 
-using Shop.App.Interfaces;
-using Shop.App.Middlewares;
-using Shop.App.Services;
+using Shop.Api.Interfaces;
+using Shop.Api.Middlewares;
+using Shop.Api.Services;
 
-namespace Shop.App;
+namespace Shop.Api;
 
 //public static class MiddlewareExtensions
 //{
@@ -21,12 +21,17 @@ public class Program
         // Add services to the container.
         //DI container
         builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
         builder.Services.AddScoped<IProductService, ProductService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
 
         var app = builder.Build();
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         // Configure the HTTP request pipeline.
         //if (app.Environment.IsDevelopment())

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Shop.App.Controllers;
+namespace Shop.Api.Controllers;
 
 [ApiController]
 [Route("api/v1")] //https://ip:port/api/v1

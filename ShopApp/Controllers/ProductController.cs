@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Shop.App.Filters;
-using Shop.App.Interfaces;
+using Shop.Api.Filters;
+using Shop.Api.Interfaces;
 using Shop.Domain.Models;
 
-namespace Shop.App.Controllers;
+namespace Shop.Api.Controllers;
 //URL - Uniform Resource Locator - текстовий рядок, який вказує
 //на місце розташування ресурса
 

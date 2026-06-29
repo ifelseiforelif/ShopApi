@@ -1,6 +1,6 @@
 ﻿using Shop.Domain.Models;
 
-namespace Shop.App.Interfaces;
+namespace Shop.Api.Interfaces;
 
 public interface IProductService
 {

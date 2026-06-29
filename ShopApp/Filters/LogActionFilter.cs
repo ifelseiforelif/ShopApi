@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Shop.App.Filters;
+namespace Shop.Api.Filters;
 
 public class LogActionFilter:ActionFilterAttribute
 {
