@@ -21,13 +21,18 @@ public class Program
         // Add services to the container.
         //DI container
         builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+
         builder.Services.AddScoped<IProductService, ProductService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
 
         var app = builder.Build();
-
+        app.UseSwagger();
+        app.UseSwaggerUI();
         // Configure the HTTP request pipeline.
         //if (app.Environment.IsDevelopment())
         //{
