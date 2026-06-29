@@ -10,13 +10,13 @@ public class ProductService : IProductService
     {
         _products.Add(new Product()
         {
-            Title = "Milk",
-            Price = 40.9f
+            Name = "Milk",
+            Price = 40.9m
         });
         _products.Add(new Product()
         {
-            Title = "Bread",
-            Price = 30.5f
+            Name = "Bread",
+            Price = 30.5m
         });
     }
 

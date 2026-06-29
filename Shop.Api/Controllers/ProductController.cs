@@ -31,7 +31,7 @@ public class ProductController(IProductService _productService) : ControllerBase
     {
         var product = new Product()
         {
-            Title = $"Test Product {id}",
+            Name = $"Test Product {id}",
             Price = 100
         };
         return Ok(product);

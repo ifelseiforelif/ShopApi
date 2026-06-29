@@ -29,8 +29,6 @@ public class Product:BaseEntity
     [Column("is_active")]
     public bool IsActive { get; set; } = true;
 
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // FK до категорії
     [Required]
