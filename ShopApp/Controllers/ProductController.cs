@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Shop.App.Filters;
 using Shop.App.Interfaces;
 using Shop.Domain.Models;
 
@@ -8,6 +9,7 @@ namespace Shop.App.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[LogActionFilter]
 public class ProductController(IProductService _productService) : ControllerBase
 {
     //private readonly IProductService _productService;
@@ -18,6 +20,7 @@ public class ProductController(IProductService _productService) : ControllerBase
 
     //EndPoint
     [HttpGet]
+  
     public List<Product> GetProducts()
     {
         return _productService.GetAllProducts();
