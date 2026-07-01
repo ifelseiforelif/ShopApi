@@ -24,6 +24,13 @@ public class Category:BaseEntity
     [Column("slug")]
     public string Slug { get; set; } = string.Empty;
 
+
+    [Column("url")]
+    public string Url { get; set; } = string.Empty;
+
+    [Column("is_active")]
+    public bool IsActive { get; set; } = true;
+
     // Self-referencing (підкатегорія)
     [Column("parent_id")]
     public int? ParentId { get; set; }
