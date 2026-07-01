@@ -8,8 +8,8 @@ public class CategoryRepository(ShopDbContext _context) : ICategoryRepository
 {
     public async Task<int?> AddCategoryAsync(Category category)
     {
-        _context.Categories.Add(category);
-        _context.SaveChangesAsync();
+        await _context.Categories.AddAsync(category);
+        await _context.SaveChangesAsync();
         return category.Id;
     }
 }
