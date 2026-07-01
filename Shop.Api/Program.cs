@@ -3,7 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Api.Interfaces;
 using Shop.Api.Middlewares;
 using Shop.Api.Services;
+using Shop.Application.Interfaces.Repository;
+using Shop.Application.Interfaces.Services;
+using Shop.Application.Services;
 using Shop.Infrastructure.Data;
+using Shop.Infrastructure.Repositories;
 
 namespace Shop.Api;
 
@@ -28,8 +32,11 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
+        //--------------SERVICES-------------------
         builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<ICategoryService, CategoryService>();
+        //--------------REPOSITORIES
+        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
