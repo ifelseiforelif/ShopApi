@@ -34,6 +34,7 @@ public class Program
         //--------------SERVICES-------------------
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<IImageService, ImageService>();
         //--------------REPOSITORIES
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
