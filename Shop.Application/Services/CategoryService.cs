@@ -18,4 +18,28 @@ public class CategoryService(ICategoryRepository _repository) : ICategoryService
             ParentId = dto.ParentId,
         });
     }
+
+    public async Task<CategoryReadDTO?> GetCategoryByIdAsync(int id)
+    {
+        CategoryReadDTO? dto = null;
+        var category = await _repository.GetCategoryByIdAsync(id);
+        if (category != null)
+        {
+            dto = new CategoryReadDTO()
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Slug = category.Slug,
+                Url = category.Url,
+                IsActive = category.IsActive,
+                ParentId = category.ParentId,
+                Products = category.Products
+                            .Select(p => p.Id)
+                            .ToList()
+            };
+
+
+        }
+        return dto;
+    }
 }
