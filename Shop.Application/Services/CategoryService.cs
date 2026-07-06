@@ -19,7 +19,6 @@ public class CategoryService(ICategoryRepository _repository) : ICategoryService
         });
     }
 
-<<<<<<< HEAD
     public async Task<CategoryReadDTO?> GetCategoryByIdAsync(int id)
     {
         CategoryReadDTO? dto = null;
@@ -42,7 +41,7 @@ public class CategoryService(ICategoryRepository _repository) : ICategoryService
 
         }
         return dto;
-=======
+    }
     public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync()
     {
         List<Category>? categories = await _repository.GetAllCategoriesAsync();
@@ -63,6 +62,5 @@ public class CategoryService(ICategoryRepository _repository) : ICategoryService
             });
         }
         return dtos;
->>>>>>> dtos
     }
 }
