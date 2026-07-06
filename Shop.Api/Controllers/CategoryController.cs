@@ -15,4 +15,15 @@ public class CategoryController(ICategoryService _categoryService):ControllerBas
         int? id = await _categoryService.CreateCategoryAsync(dto);
         return Ok($"Category created {id}"); //200 status
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllCategories()
+    {
+        List<CategoryReadDTO>? categories = await _categoryService.GetAllCategoriesAsync();
+        if(categories== null || categories.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(categories);
+    }
 }
