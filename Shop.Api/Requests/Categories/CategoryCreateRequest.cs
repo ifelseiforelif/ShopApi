@@ -1,9 +1,8 @@
 ﻿using Shop.Application.DTOs.CategoryDTOs;
 
-namespace Shop.Api.Requests.Categories
+namespace Shop.Api.Requests.Categories;
+
+public class CategoryCreateRequest:CategoryCreateDTO
 {
-    public class CategoryCreateRequest:CategoryCreateDTO
-    {
-        public IFormFile? Image { get; set; }
-    }
+    public IFormFile? Image { get; set; }
 }
