@@ -26,6 +26,17 @@ public class Program
         {
             options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"));
         });
+
+        // ================= CORS =================
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+        });
         // Add services to the container.
         //DI container
         builder.Services.AddControllers();
@@ -44,6 +55,7 @@ public class Program
         var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI();
+        app.UseCors("AllowAll");
 
         // Configure the HTTP request pipeline.
         //if (app.Environment.IsDevelopment())

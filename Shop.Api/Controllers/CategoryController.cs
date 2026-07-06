@@ -44,4 +44,15 @@ public class CategoryController(ICategoryService _categoryService, IImageService
 
         return Ok(dto);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllCategories()
+    {
+        List<CategoryReadDTO>? categories = await _categoryService.GetAllCategoriesAsync();
+        if(categories== null || categories.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(categories);
+    }
 }
