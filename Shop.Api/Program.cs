@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Shop.Api.Interfaces;
 using Shop.Api.Middlewares;
 using Shop.Api.Services;
@@ -7,9 +10,12 @@ using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
 using Shop.Application.Mapping;
 using Shop.Application.Services;
+using Shop.Infrastructure.Configuration;
 using Shop.Infrastructure.Data;
 using Shop.Infrastructure.Helpers;
 using Shop.Infrastructure.Repositories;
+using Shop.Infrastructure.Services;
+using System.Text;
 
 namespace Shop.Api;
 
@@ -30,12 +36,22 @@ public class Program
             options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"));
         });
 
+        var configuration = builder.Configuration;
+        // ================= JWT Settings =================
+        var jwtSettings = configuration
+            .GetSection("Jwt")
+            .Get<JwtSettings>()
+            ?? throw new Exception("JWT settings not configured.");
 
+        //Реєстрація налаштувань в DI, можемо їх читати будь-де
+        builder.Services.Configure<JwtSettings>(
+            configuration.GetSection("Jwt"));
 
         // ================= AutoMapper =================
         builder.Services.AddAutoMapper(
             _ => { },
-            typeof(CategoryProfile).Assembly
+            typeof(CategoryProfile).Assembly,
+            typeof(UserProfile).Assembly
         );
 
         // ================= CORS =================
@@ -52,13 +68,35 @@ public class Program
         //DI container
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+
+        // ================= Swagger + JWT =================
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Description = "Enter JWT token"
+            });
+
+            options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+            });
+        });
+        //builder.Services.AddSwaggerGen();
+
+
         //--------------SERVICES-------------------
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IImageService, ImageService>();
         builder.Services.AddSingleton<IHashHelper, HashHelper>();
+        builder.Services.AddScoped<IJWTService, JWTService>();
         //--------------REPOSITORIES
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -66,20 +104,49 @@ public class Program
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi();
 
+
+        // ================= Authentication =================
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            //Правила перевірки токена
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer = jwtSettings.Issuer,
+                ValidAudience = jwtSettings.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtSettings.Key)
+                ),
+
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
+        builder.Services.AddAuthorization();
+
         var app = builder.Build();
-        app.UseSwagger();
-        app.UseSwaggerUI();
+       
         app.UseCors("AllowAll");
 
-        // Configure the HTTP request pipeline.
-        //if (app.Environment.IsDevelopment())
-        //{
-        //    app.MapOpenApi();
-        //}
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
-        //app.UseHttpsRedirection();
 
-        //app.UseAuthorization();
+        app.UseHttpsRedirection();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseMiddleware<RequestTimerMiddleware>();
         app.UseStaticFiles();

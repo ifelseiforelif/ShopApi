@@ -13,5 +13,6 @@ public class UserProfile:Profile
     {
         CreateMap<UserCreateDTO, User>();
         CreateMap<User, UserReadDTO>();
+        CreateMap<User, UserLoginDTO>();
     }
 }

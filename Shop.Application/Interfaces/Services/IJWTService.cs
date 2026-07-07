@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Shop.Application.Interfaces.Services;
 
-public interface IAuthService
+public interface IJWTService
 {
-    Task<(UserReadDTO? User, string? Token)> RegisterAsync(UserCreateDTO dto);
+    public string GenerateAccessToken(UserLoginDTO userLoginDto, string role);
 }
