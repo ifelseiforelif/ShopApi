@@ -11,7 +11,10 @@ public class CategoryProfile:Profile
 {
     public CategoryProfile()
     {
+        //             src              dest
         CreateMap<CategoryCreateDTO, Category>(); //CategoryCreateDto -> Category
+
+
         CreateMap<Category, CategoryReadDTO>()
     .ForMember(dest => dest.Products,
         opt => opt.MapFrom(src => src.Products.Select(p => p.Id).ToList()));
