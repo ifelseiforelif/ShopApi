@@ -10,7 +10,7 @@ namespace Shop.Api.Controllers;
 
 public class AuthController(IAuthService _authService):ControllerBase
 {
-    [HttpPost]
+    [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromBody] UserCreateDTO dto)
     {
         var user = await _authService.RegisterAsync(dto);
@@ -25,6 +25,13 @@ public class AuthController(IAuthService _authService):ControllerBase
         //    Expires = DateTimeOffset.UtcNow.AddMinutes(30)
         //});
         return Ok(new { user = user.User, token = user.Token });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginUser([FromBody] UserLoginDTO dto)
+    {
+        //TODO: Зробити роут для входа
+        return Ok();
     }
 
     [Authorize]
