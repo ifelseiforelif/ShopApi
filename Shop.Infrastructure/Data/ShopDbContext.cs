@@ -51,6 +51,11 @@ public class ShopDbContext:DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // --- User ---
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasIndex(u => u.Email).IsUnique();
+        });
         // --- Category ---
         modelBuilder.Entity<Category>(entity =>
         {
