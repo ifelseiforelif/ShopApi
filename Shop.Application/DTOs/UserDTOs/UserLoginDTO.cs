@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Shop.Application.DTOs.UserDTOs;
 
+/// <summary>
+/// DTO для аутентифікації
+/// </summary>
 public class UserLoginDTO
 {
     [Required]
