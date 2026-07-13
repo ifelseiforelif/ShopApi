@@ -35,7 +35,8 @@ public class Program
         // ================= AutoMapper =================
         builder.Services.AddAutoMapper(
             _ => { },
-            typeof(CategoryProfile).Assembly
+            typeof(CategoryProfile).Assembly,
+            typeof(UserProfile).Assembly
         );
 
         // ================= CORS =================
@@ -58,6 +59,7 @@ public class Program
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IImageService, ImageService>();
+        //--------------HELPERS--------------------
         builder.Services.AddSingleton<IHashHelper, HashHelper>();
         //--------------REPOSITORIES
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

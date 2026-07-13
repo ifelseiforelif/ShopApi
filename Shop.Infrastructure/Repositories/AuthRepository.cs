@@ -18,17 +18,11 @@ public class AuthRepository(ShopDbContext _context) : IAuthRepository
         return true;
     }
 
-    public async Task<User>? RegisterUserAsync(User user, string hash)
+    public async Task<User?> RegisterUserAsync(User user, string hash)
     {
         user.PasswordHash = hash;
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
-        return await _context.Users.FirstOrDefaultAsync(us => (us.Email == user.Email && us.PasswordHash == user.PasswordHash)); ;
-        /*
-         1) Перевірити чи немає вже у БД такого email
-         2) Захешувати пароль
-         3) Додати користувача у БД
-         4) Зробити токен, скоріше за все не тут будемо робити
-         */
+        return await _context.Users.FirstOrDefaultAsync(us => (us.Email == user.Email && us.PasswordHash == user.PasswordHash));
     }
 }
