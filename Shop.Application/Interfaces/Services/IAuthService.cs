@@ -7,5 +7,5 @@ namespace Shop.Application.Interfaces.Services;
 
 public interface IAuthService
 {
-    Task<(UserReadDTO? User, string? Token)> RegisterAsync(UserCreateDTO dto);
+    Task<(UserReadDTO? User, string? Token, string? RefreshToken)> RegisterAsync(UserCreateDTO dto);
 }
