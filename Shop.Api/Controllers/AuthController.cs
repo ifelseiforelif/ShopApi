@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Application.DTOs.UserDTOs;
 using Shop.Application.Interfaces.Services;
@@ -6,7 +8,7 @@ using Shop.Application.Interfaces.Services;
 namespace Shop.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("v1/api/[controller]")]
 
 public class AuthController(IAuthService _authService):ControllerBase
 {
@@ -17,13 +19,17 @@ public class AuthController(IAuthService _authService):ControllerBase
         if(user.User==null || user.Token == null)
             return BadRequest("Користувач за таким email вже існує");
 
-        //Response.Cookies.Append("accessToken", user.Token, new CookieOptions
-        //{
-        //    HttpOnly = true,
-        //    Secure = true,
-        //    SameSite = SameSiteMode.Strict,
-        //    Expires = DateTimeOffset.UtcNow.AddMinutes(30)
-        //});
+
+        Response.Cookies.Append(
+            "refreshToken",
+            user.Token,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+               // Expires = new DateTimeOffset(dbDate);
+            });
         return Ok(new { user = user.User, token = user.Token });
     }
 
