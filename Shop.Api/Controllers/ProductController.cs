@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Filters;
 using Shop.Api.Interfaces;
 using Shop.Domain.Models;
@@ -37,6 +38,7 @@ public class ProductController(IProductService _productService) : ControllerBase
         return Ok(product);
     }
 
+    [Authorize]
     [HttpPost]
     public IActionResult AddNewProduct([FromBody] Product product)
     {
