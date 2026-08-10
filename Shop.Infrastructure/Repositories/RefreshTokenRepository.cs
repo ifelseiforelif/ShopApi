@@ -2,13 +2,14 @@
 using Shop.Application.Interfaces.Repository;
 using Shop.Domain.Models;
 using Shop.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Shop.Infrastructure.Repositories;
 
-internal class RefreshTokenRepository(ShopDbContext _context) : IRefreshTokenRepository
+public class RefreshTokenRepository(ShopDbContext _context) : IRefreshTokenRepository
 {
     public async Task AddAsync(RefreshToken refreshToken)
     {
@@ -29,5 +30,18 @@ internal class RefreshTokenRepository(ShopDbContext _context) : IRefreshTokenRep
     public Task UpdateAsync(RefreshToken refreshToken)
     {
         throw new NotImplementedException();
+    }
+    public async Task RevokeAllRefreshTokensAsync(Guid userId)
+    {
+        var tokens = await _context.RefreshTokens
+            .Where(x => x.UserId== userId && !x.IsRevoked)
+            .ToListAsync();
+
+        foreach (var token in tokens)
+        {
+            token.IsRevoked = true;
+        }
+
+        await _context.SaveChangesAsync();
     }
 }

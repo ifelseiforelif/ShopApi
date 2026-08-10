@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Shop.Application.Services;
-
 public class AuthService(IMapper _mapper, IAuthRepository _repository, IHashHelper _hashHelper, IJWTService _jwtService, IRefreshTokenRepository _refreshTokenRepository) : IAuthService
 {
     public async Task<(UserReadDTO? User, string? Token, string? RefreshToken)> RegisterAsync(UserCreateDTO dto)
@@ -23,6 +22,7 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IHashHelp
             var registerUser = await _repository.RegisterUserAsync(user, hash);
             if (registerUser != null)
             {
+              
                 var token = _jwtService.GenerateAccessToken(_mapper.Map<UserLoginDTO>(user), user.Role.ToString());
                 var refreshToken = _jwtService.GenerateRefreshToken();
                 _refreshTokenRepository.AddAsync(new RefreshToken
@@ -37,5 +37,27 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IHashHelp
             }
         }
         return (null,null,null);
+    }
+
+    public async Task<(string? Token, string? RefreshToken)> LoginAsync(UserLoginDTO dto)
+    {
+        var user = await _repository.GetByEmailAsync(dto.Email);
+        if (user == null) return (null, null);
+
+        if (!_hashHelper.IsValidPassword(dto.Password, user.PasswordHash))
+            return (null, null);
+        await _refreshTokenRepository.RevokeAllRefreshTokensAsync(user.Id);
+        var token = _jwtService.GenerateAccessToken(dto, user.Role.ToString());
+        var refreshToken = _jwtService.GenerateRefreshToken();
+        await _refreshTokenRepository.AddAsync(new RefreshToken
+        {
+            Token = refreshToken.Item1,
+            UserId = user.Id,
+            IsRevoked = false,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(refreshToken.Item2)
+        });
+
+        return (token, refreshToken.Item1);
     }
 }

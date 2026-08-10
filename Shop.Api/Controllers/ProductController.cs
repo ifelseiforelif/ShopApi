@@ -9,7 +9,7 @@ namespace Shop.Api.Controllers;
 //на місце розташування ресурса
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 [LogActionFilter]
 public class ProductController(IProductService _productService) : ControllerBase
 {

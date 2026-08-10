@@ -8,7 +8,7 @@ using Shop.Application.Interfaces.Services;
 namespace Shop.Api.Controllers;
 
 [ApiController]
-[Route("v1/api/[controller]")]
+[Route("api/v1/[controller]")]
 
 public class AuthController(IAuthService _authService):ControllerBase
 {
@@ -36,8 +36,22 @@ public class AuthController(IAuthService _authService):ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> LoginUser([FromBody] UserLoginDTO dto)
     {
-        //TODO: Зробити роут для входа
-        return Ok();
+        var user = await _authService.LoginAsync(dto);
+        if (user.Token == null || user.RefreshToken == null)
+            return BadRequest("Користувач за таким email вже існує");
+
+
+        Response.Cookies.Append(
+            "refreshToken",
+            user.Token,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                // Expires = new DateTimeOffset(dbDate);
+            });
+        return Ok(new {token = user.Token });
     }
 
     [Authorize]

@@ -10,6 +10,12 @@ namespace Shop.Infrastructure.Repositories;
 
 public class AuthRepository(ShopDbContext _context) : IAuthRepository
 {
+    public async Task<User>? GetByEmailAsync(string email)
+    {
+        var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+        return userFromDb;
+    }
+
     public async Task<bool> IsExistEmailAsync(string email)
     {
         var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);

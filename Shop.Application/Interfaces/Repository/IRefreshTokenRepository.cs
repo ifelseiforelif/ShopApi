@@ -14,4 +14,6 @@ public interface IRefreshTokenRepository
     Task UpdateAsync(RefreshToken refreshToken);
 
     Task DeleteAsync(RefreshToken refreshToken);
+
+    Task RevokeAllRefreshTokensAsync(Guid userId);
 }

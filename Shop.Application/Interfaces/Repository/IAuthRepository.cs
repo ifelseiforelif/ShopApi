@@ -8,4 +8,6 @@ public interface IAuthRepository
 {
     Task<User>? RegisterUserAsync(User user, string hash);
     Task<bool> IsExistEmailAsync(string email);
+
+    Task<User>? GetByEmailAsync(string email);
 }

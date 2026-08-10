@@ -100,12 +100,7 @@ public class Program
         //--------------REPOSITORIES
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        //builder.Services.AddOpenApi();
-
-
-        // ================= Authentication =================
+        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -148,7 +143,7 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseMiddleware<RequestTimerMiddleware>();
+        //app.UseMiddleware<RequestTimerMiddleware>();
         app.UseStaticFiles();
         app.MapControllers();
         
