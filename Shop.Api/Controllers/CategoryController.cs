@@ -12,7 +12,7 @@ namespace Shop.Api.Controllers;
 [Route("api/v1/[controller]")] //https://ip:port/api/v1
 public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto)
     {
