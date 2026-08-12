@@ -64,6 +64,17 @@ public class Program
                       .AllowAnyHeader();
             });
         });
+
+        //builder.Services.AddCors(options =>
+        //{
+        //    options.AddPolicy("ProductionPolicy", policy =>
+        //    {
+        //        policy.WithOrigins("https://example.com", "https://www.example.com")
+        //              .WithMethods("GET", "POST", "PUT", "DELETE")
+        //              .WithHeaders("Content-Type", "Authorization");
+        //    });
+        //});
+
         // Add services to the container.
         //DI container
         builder.Services.AddControllers();
@@ -131,6 +142,7 @@ public class Program
         var app = builder.Build();
        
         app.UseCors("AllowAll");
+        //app.UseCors("ProductionPolicy");
 
         if (app.Environment.IsDevelopment())
         {
