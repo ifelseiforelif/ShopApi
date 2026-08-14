@@ -37,7 +37,9 @@ public class CategoryController(ICategoryService _categoryService, IImageService
                     new { id });             // тіло відповіді
     }
 
-    [HttpGet("{id}")]
+
+
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<CategoryReadDTO>> GetCategoryById(int id)
     {
         var dto = await _categoryService.GetCategoryByIdAsync(id);
@@ -48,7 +50,29 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         return Ok(dto);
     }
 
+<<<<<<< HEAD
     //[Authorize]
+=======
+
+    /// <summary>
+    /// Отримання категорії за slug-ом
+    /// </summary>
+    /// <param name="slug"></param>
+    /// <returns></returns>
+    [HttpGet("{slug}")]
+
+    public async Task<ActionResult<CategoryReadDTO>> GetCategoryBySlug(string slug)
+    {
+        var dto = await _categoryService.GetCategoryBySlugAsync(slug);
+
+        if (dto == null)
+            return NotFound();
+
+        return Ok(dto);
+    }
+
+
+>>>>>>> products
     [HttpGet]
     public async Task<IActionResult> GetAllCategories()
     {
@@ -59,4 +83,16 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         }
         return Ok(categories);
     }
+
+    [HttpGet("sub/{id:int}")]
+    public async Task<IActionResult> GetAllCategoriesByParentId(int id)
+    {
+        List<CategoryReadDTO>? categories = await _categoryService.GetAllCategoriesByParentIdAsync(id);
+        if (categories == null || categories.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(categories);
+    }
+
 }

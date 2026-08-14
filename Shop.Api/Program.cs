@@ -5,6 +5,7 @@ using Microsoft.OpenApi;
 using Shop.Api.Interfaces;
 using Shop.Api.Middlewares;
 using Shop.Api.Services;
+using Shop.Application.Interfaces.Configurations;
 using Shop.Application.Interfaces.Helpers;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
@@ -79,6 +80,7 @@ public class Program
         //DI container
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
+<<<<<<< HEAD
 
         // ================= Swagger + JWT =================
         builder.Services.AddSwaggerGen(options =>
@@ -101,10 +103,16 @@ public class Program
         //builder.Services.AddSwaggerGen();
 
 
+=======
+        builder.Services.AddSwaggerGen();
+        //--------------PROVIDERS-----------------
+        builder.Services.AddScoped<IFilePathProvider, FilePathProvider>();
+>>>>>>> products
         //--------------SERVICES-------------------
-        builder.Services.AddScoped<IProductService, ProductService>();
+       
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IProductService,  ProductService>();
         builder.Services.AddScoped<IImageService, ImageService>();
         builder.Services.AddSingleton<IHashHelper, HashHelper>();
         builder.Services.AddScoped<IJWTService, JWTService>();
@@ -114,6 +122,7 @@ public class Program
         builder.Services.AddMemoryCache();
 
         //--------------REPOSITORIES
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

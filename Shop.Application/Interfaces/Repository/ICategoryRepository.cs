@@ -8,5 +8,9 @@ public interface ICategoryRepository
 
     Task<Category?> GetCategoryByIdAsync(int id);
 
+    Task<Category?> GetCategoryBySlugAsync(string slug);
+
     Task<List<Category>?> GetAllCategoriesAsync();
+
+    Task<List<Category>?> GetCategoriesByParentIdAsync(int id);
 }
