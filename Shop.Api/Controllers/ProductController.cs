@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Filters;
-=======
-﻿using Microsoft.AspNetCore.Mvc;
->>>>>>> products
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Products;
 using Shop.Application.DTOs.ProductDTOs;
@@ -17,13 +13,8 @@ namespace Shop.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-<<<<<<< HEAD
-[LogActionFilter]
-public class ProductController(IProductService _productService) : ControllerBase
-=======
 //[LogActionFilter]
 public class ProductController(IProductService _productService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
->>>>>>> products
 {
     /// <summary>Створити новий продукт разом із фотографіями</summary>
     /// <param name="dto">Дані продукту та файли зображень</param>
@@ -86,11 +77,11 @@ public class ProductController(IProductService _productService, IImageService _i
         return Ok(product);
     }
 
-<<<<<<< HEAD
-    [Authorize]
-    [HttpPost]
-    public IActionResult AddNewProduct([FromBody] Product product)
-=======
+//<<<<<<< HEAD
+//    [Authorize]
+//    [HttpPost]
+//    public IActionResult AddNewProduct([FromBody] Product product)
+//=======
     /// <summary>
     /// Отримання продукта за slug
     /// </summary>
@@ -98,7 +89,6 @@ public class ProductController(IProductService _productService, IImageService _i
     /// <returns></returns>
     [HttpGet("{slug}")]
     public async Task<IActionResult> GetProductBySlug(string slug)
->>>>>>> products
     {
         return Ok();
     }

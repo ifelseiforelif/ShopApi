@@ -50,15 +50,12 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         return Ok(dto);
     }
 
-<<<<<<< HEAD
-    //[Authorize]
-=======
-
     /// <summary>
     /// Отримання категорії за slug-ом
     /// </summary>
     /// <param name="slug"></param>
     /// <returns></returns>
+    /// //[Authorize]
     [HttpGet("{slug}")]
 
     public async Task<ActionResult<CategoryReadDTO>> GetCategoryBySlug(string slug)
@@ -72,7 +69,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
     }
 
 
->>>>>>> products
+
     [HttpGet]
     public async Task<IActionResult> GetAllCategories()
     {

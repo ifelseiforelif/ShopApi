@@ -80,7 +80,6 @@ public class Program
         //DI container
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-<<<<<<< HEAD
 
         // ================= Swagger + JWT =================
         builder.Services.AddSwaggerGen(options =>
@@ -103,11 +102,9 @@ public class Program
         //builder.Services.AddSwaggerGen();
 
 
-=======
         builder.Services.AddSwaggerGen();
         //--------------PROVIDERS-----------------
         builder.Services.AddScoped<IFilePathProvider, FilePathProvider>();
->>>>>>> products
         //--------------SERVICES-------------------
        
         builder.Services.AddScoped<ICategoryService, CategoryService>();

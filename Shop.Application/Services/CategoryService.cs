@@ -7,11 +7,8 @@ using Shop.Domain.Models;
 
 namespace Shop.Application.Services;
 
-<<<<<<< HEAD
-public class CategoryService(ICategoryRepository _repository, IMapper _mapper, ICachingService _cachingService) : ICategoryService
-=======
-public class CategoryService(ICategoryRepository _repository, IMapper _mapper, IFilePathProvider _filePathProvider) : ICategoryService
->>>>>>> products
+
+public class CategoryService(ICategoryRepository _repository, IMapper _mapper, ICachingService _cachingService,IFilePathProvider _filePathProvider) : ICategoryService
 {
     /// <summary>
     /// Метод формує "правильний" шлях до картинки
@@ -46,24 +43,34 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
         var cache = await _cachingService.GetAsync<List<CategoryReadDTO>>(keyCaching);
         if (cache == null)
         {
-<<<<<<< HEAD
+        
             List<Category>? categories = await _repository.GetAllCategoriesAsync();
-            
+
             if (categories != null && categories.Count > 0)
             {
                 cache = _mapper.Map<List<CategoryReadDTO>>(categories);
+                cache.ForEach(dto => FixedImageForCategory(dto));
                 await _cachingService.SetAsync(keyCaching, cache, null);
             }
         }
-        
+
         return cache;
-=======
-            dtos = _mapper.Map<List<CategoryReadDTO>>(categories);
-            dtos.ForEach(dto => FixedImageForCategory(dto));
-        }
-       
-        return dtos;
->>>>>>> products
+    
+        //string keyCaching = "Categories";
+        //var cache = await _cachingService.GetAsync<List<CategoryReadDTO>>(keyCaching);
+        //if (cache == null)
+        //{
+        //    List<Category>? categories = await _repository.GetAllCategoriesAsync();
+
+        //    if (categories != null && categories.Count > 0)
+        //    {
+        //        cache = _mapper.Map<List<CategoryReadDTO>>(categories);
+        //        await _cachingService.SetAsync(keyCaching, cache, null);
+        //    }
+        //}
+
+        //return cache;
+
     }
 
     public async Task<CategoryReadDTO?> GetCategoryBySlugAsync(string slug)
