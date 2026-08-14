@@ -108,6 +108,11 @@ public class Program
         builder.Services.AddScoped<IImageService, ImageService>();
         builder.Services.AddSingleton<IHashHelper, HashHelper>();
         builder.Services.AddScoped<IJWTService, JWTService>();
+        builder.Services.AddSingleton<ICachingService, MemoryCachingService>();
+
+        //===================CACHE=======================
+        builder.Services.AddMemoryCache();
+
         //--------------REPOSITORIES
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();

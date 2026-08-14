@@ -6,7 +6,7 @@ using Shop.Domain.Models;
 
 namespace Shop.Application.Services;
 
-public class CategoryService(ICategoryRepository _repository, IMapper _mapper) : ICategoryService
+public class CategoryService(ICategoryRepository _repository, IMapper _mapper, ICachingService _cachingService) : ICategoryService
 {
     //TODO: додати Automapper
     public async Task<int?> CreateCategoryAsync(CategoryCreateDTO dto)
@@ -27,12 +27,19 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper) :
     }
     public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync()
     {
-        List<Category>? categories = await _repository.GetAllCategoriesAsync();
-        List<CategoryReadDTO>? dtos = null;
-        if (categories != null && categories.Count > 0)
+        string keyCaching = "Categories";
+        var cache = await _cachingService.GetAsync<List<CategoryReadDTO>>(keyCaching);
+        if (cache == null)
         {
-            dtos = _mapper.Map<List<CategoryReadDTO>>(categories);
+            List<Category>? categories = await _repository.GetAllCategoriesAsync();
+            
+            if (categories != null && categories.Count > 0)
+            {
+                cache = _mapper.Map<List<CategoryReadDTO>>(categories);
+                await _cachingService.SetAsync(keyCaching, cache, null);
+            }
         }
-        return dtos;
+        
+        return cache;
     }
 }
