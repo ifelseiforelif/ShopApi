@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shop.Api.Filters;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Products;
 using Shop.Application.DTOs.ProductDTOs;
@@ -77,11 +76,6 @@ public class ProductController(IProductService _productService, IImageService _i
         return Ok(product);
     }
 
-//<<<<<<< HEAD
-//    [Authorize]
-//    [HttpPost]
-//    public IActionResult AddNewProduct([FromBody] Product product)
-//=======
     /// <summary>
     /// Отримання продукта за slug
     /// </summary>
@@ -137,6 +131,7 @@ public class ProductController(IProductService _productService, IImageService _i
     /// <summary>Видалити продукт</summary>
     /// <param name="id">Ідентифікатор продукту</param>
     /// <returns>Результат видалення</returns>
+    [Authorize
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
