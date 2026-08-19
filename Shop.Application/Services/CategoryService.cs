@@ -39,37 +39,32 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
     }
     public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync()
     {
-        string keyCaching = "Categories";
-        var cache = await _cachingService.GetAsync<List<CategoryReadDTO>>(keyCaching);
-        if (cache == null)
-        {
-        
-            List<Category>? categories = await _repository.GetAllCategoriesAsync();
-
-            if (categories != null && categories.Count > 0)
-            {
-                cache = _mapper.Map<List<CategoryReadDTO>>(categories);
-                cache.ForEach(dto => FixedImageForCategory(dto));
-                await _cachingService.SetAsync(keyCaching, cache, null);
-            }
-        }
-
-        return cache;
-    
         //string keyCaching = "Categories";
         //var cache = await _cachingService.GetAsync<List<CategoryReadDTO>>(keyCaching);
         //if (cache == null)
         //{
+        //    Console.WriteLine("Reading from DB...");
         //    List<Category>? categories = await _repository.GetAllCategoriesAsync();
 
         //    if (categories != null && categories.Count > 0)
         //    {
         //        cache = _mapper.Map<List<CategoryReadDTO>>(categories);
+        //        cache.ForEach(dto => FixedImageForCategory(dto));
         //        await _cachingService.SetAsync(keyCaching, cache, null);
         //    }
         //}
 
         //return cache;
+
+        List<Category>? categories = await _repository.GetAllCategoriesAsync();
+        List<CategoryReadDTO>? cat = null;
+        if (categories != null && categories.Count > 0)
+        {
+            cat = _mapper.Map<List<CategoryReadDTO>>(categories);
+            cat.ForEach(dto => FixedImageForCategory(dto));
+          
+        }
+        return cat;
 
     }
 

@@ -16,6 +16,7 @@ using Shop.Infrastructure.Data;
 using Shop.Infrastructure.Helpers;
 using Shop.Infrastructure.Repositories;
 using Shop.Infrastructure.Services;
+using StackExchange.Redis;
 using System.Text;
 
 namespace Shop.Api;
@@ -105,15 +106,24 @@ public class Program
         builder.Services.AddSwaggerGen();
         //--------------PROVIDERS-----------------
         builder.Services.AddScoped<IFilePathProvider, FilePathProvider>();
+
+        //======================Redis=====================
+        builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var config = builder.Configuration.GetConnectionString("RedisServerConnection");
+            return ConnectionMultiplexer.Connect(config);
+        });
+
         //--------------SERVICES-------------------
-       
+
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IProductService,  ProductService>();
         builder.Services.AddScoped<IImageService, ImageService>();
         builder.Services.AddSingleton<IHashHelper, HashHelper>();
         builder.Services.AddScoped<IJWTService, JWTService>();
-        builder.Services.AddSingleton<ICachingService, MemoryCachingService>();
+        //builder.Services.AddSingleton<ICachingService, MemoryCachingService>();
+        builder.Services.AddSingleton<ICachingService, RedisCachingService>();
 
         //===================CACHE=======================
         builder.Services.AddMemoryCache();

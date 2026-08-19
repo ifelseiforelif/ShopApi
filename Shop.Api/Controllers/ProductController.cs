@@ -131,7 +131,7 @@ public class ProductController(IProductService _productService, IImageService _i
     /// <summary>Видалити продукт</summary>
     /// <param name="id">Ідентифікатор продукту</param>
     /// <returns>Результат видалення</returns>
-    [Authorize
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
