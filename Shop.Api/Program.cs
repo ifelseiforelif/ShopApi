@@ -49,6 +49,10 @@ public class Program
         builder.Services.Configure<JwtSettings>(
             configuration.GetSection("Jwt"));
 
+        //==================RabbitMq==============
+        builder.Services.Configure<RabbitMqSettings>(
+            builder.Configuration.GetSection("RabbitMq")
+        );
         // ================= AutoMapper =================
         builder.Services.AddAutoMapper(
             _ => { },
