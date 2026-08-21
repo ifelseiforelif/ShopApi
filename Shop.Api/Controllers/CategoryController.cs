@@ -69,7 +69,7 @@ public class CategoryController(ICategoryService _categoryService, IImageService
         return Ok(dto);
     }
 
-
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllCategories()
     {

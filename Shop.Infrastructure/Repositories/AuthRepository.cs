@@ -10,9 +10,15 @@ namespace Shop.Infrastructure.Repositories;
 
 public class AuthRepository(ShopDbContext _context) : IAuthRepository
 {
-    public async Task<User>? GetByEmailAsync(string email)
+    public async Task<User?> GetByEmailAsync(string email)
     {
         var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+        return userFromDb;
+    }
+
+    public async Task<User?> GetUserById(Guid id)
+    {
+        var userFromDb = await _context.Users.FirstOrDefaultAsync(user => user.Id == id);
         return userFromDb;
     }
 
@@ -24,7 +30,7 @@ public class AuthRepository(ShopDbContext _context) : IAuthRepository
         return true;
     }
 
-    public async Task<User>? RegisterUserAsync(User user, string hash)
+    public async Task<User?> RegisterUserAsync(User user, string hash)
     {
         user.PasswordHash = hash;
         await _context.Users.AddAsync(user);

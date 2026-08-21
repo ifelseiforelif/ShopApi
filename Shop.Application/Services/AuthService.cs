@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Shop.Application.DTOs.UserDTOs;
+using Shop.Application.DTOs.AuthDTOs;
 using Shop.Application.Interfaces.Helpers;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
@@ -14,8 +15,9 @@ public class AuthService(
     IAuthRepository _repository, 
     IHashHelper _hashHelper, 
     IJWTService _jwtService, 
-    IRefreshTokenRepository _refreshTokenRepository, 
+    IRefreshTokenRepository _refreshTokenRepository,
     IQueueService _queueService) : IAuthService
+ 
 {
     public async Task<(UserReadDTO? User, string? Token, string? RefreshToken)> RegisterAsync(UserCreateDTO dto)
     {
@@ -66,5 +68,43 @@ public class AuthService(
         });
 
         return (token, refreshToken.Item1);
+    }
+
+    public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken)
+    {
+        var token = await _refreshTokenRepository
+            .GetByTokenAsync(refreshToken);
+
+        if (token == null || token.IsRevoked == true)
+        {
+            return null;
+        }
+
+        if (token.ExpiresAt <= DateTime.UtcNow)
+        {
+            return null;
+        }
+
+        var user = await _repository.GetUserById(token.UserId);
+         
+
+        if (user == null)
+        {
+            return null;
+        }
+
+        
+        var newRefreshToken = _jwtService.GenerateRefreshToken();
+        token.Token = newRefreshToken.Item1;
+        token.ExpiresAt = DateTime.UtcNow.AddDays(newRefreshToken.Item2);
+       
+        await _refreshTokenRepository.UpdateAsync(token);
+        var newAccessToken = _jwtService.GenerateAccessToken(_mapper.Map<UserLoginDTO>(user), user.Role.ToString());
+
+        return new AuthResponseDto
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = token.Token
+        };
     }
 }

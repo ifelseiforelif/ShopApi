@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Application.DTOs.AuthDTOs;
 using Shop.Application.DTOs.UserDTOs;
 using Shop.Application.Interfaces.Services;
+using Shop.Domain.Models;
 
 namespace Shop.Api.Controllers;
 
@@ -52,6 +54,30 @@ public class AuthController(IAuthService _authService):ControllerBase
                 // Expires = new DateTimeOffset(dbDate);
             });
         return Ok(new {token = user.Token });
+    }
+
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh()
+    {
+        if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+        {
+            return Unauthorized("Refresh token not found.");
+        }
+
+        var result = await _authService.RefreshTokenAsync(refreshToken);
+        if(result==null) return Unauthorized("Refresh token not created.");
+        Response.Cookies.Append(
+           "refreshToken",
+           result.RefreshToken,
+           new CookieOptions
+           {
+               HttpOnly = true,
+               Secure = true,
+               SameSite = SameSiteMode.Strict,
+               // Expires = new DateTimeOffset(dbDate);
+           });
+        return Ok(new { token = result.AccessToken });
     }
 
     [Authorize]

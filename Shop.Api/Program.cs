@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Shop.Api.Interfaces;
-using Shop.Api.Middlewares;
 using Shop.Api.Services;
 using Shop.Application.Interfaces.Configurations;
 using Shop.Application.Interfaces.Helpers;
@@ -15,163 +14,281 @@ using Shop.Infrastructure.Configuration;
 using Shop.Infrastructure.Data;
 using Shop.Infrastructure.Helpers;
 using Shop.Infrastructure.Repositories;
+using Shop.Infrastructure.Seeds;
 using Shop.Infrastructure.Services;
 using StackExchange.Redis;
 using System.Text;
 
 namespace Shop.Api;
 
-//public static class MiddlewareExtensions
-//{
-//    public static IApplicationBuilder UseRequestTimer(this IApplicationBuilder builder)
-//    {
-//        return builder.UseMiddleware<RequestTimerMiddleware>();
-//    }
-//}
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        // ================= DATABASE =================
+
         builder.Services.AddDbContext<ShopDbContext>(options =>
         {
-            options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"));
+            options.UseSqlServer(
+                builder.Configuration.GetConnectionString(
+                    "SqlServerConnection"));
         });
 
+
+        // ================= JWT SETTINGS =================
+
         var configuration = builder.Configuration;
-        // ================= JWT Settings =================
+
         var jwtSettings = configuration
             .GetSection("Jwt")
             .Get<JwtSettings>()
             ?? throw new Exception("JWT settings not configured.");
 
-        //Реєстрація налаштувань в DI, можемо їх читати будь-де
         builder.Services.Configure<JwtSettings>(
             configuration.GetSection("Jwt"));
 
-        //==================RabbitMq==============
+
+        // ================= RABBIT MQ SETTINGS =================
+
         builder.Services.Configure<RabbitMqSettings>(
-            builder.Configuration.GetSection("RabbitMq")
-        );
-        // ================= AutoMapper =================
+            configuration.GetSection("RabbitMq"));
+
+
+        // ================= AUTOMAPPER =================
+
         builder.Services.AddAutoMapper(
             _ => { },
             typeof(CategoryProfile).Assembly,
             typeof(UserProfile).Assembly
         );
 
+
         // ================= CORS =================
+
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAll", policy =>
             {
-                policy.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader();
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
             });
         });
 
-        //builder.Services.AddCors(options =>
-        //{
-        //    options.AddPolicy("ProductionPolicy", policy =>
-        //    {
-        //        policy.WithOrigins("https://example.com", "https://www.example.com")
-        //              .WithMethods("GET", "POST", "PUT", "DELETE")
-        //              .WithHeaders("Content-Type", "Authorization");
-        //    });
-        //});
 
-        // Add services to the container.
-        //DI container
+        // ================= CONTROLLERS =================
+
         builder.Services.AddControllers();
+
         builder.Services.AddEndpointsApiExplorer();
 
-        // ================= Swagger + JWT =================
+
+        // ================= SWAGGER =================
+
         builder.Services.AddSwaggerGen(options =>
         {
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Description = "Enter JWT token"
-            });
+            options.AddSecurityDefinition(
+                "Bearer",
+                new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT token"
+                });
 
-            options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-            {
-                [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-            });
+            options.AddSecurityRequirement(document =>
+                new OpenApiSecurityRequirement
+                {
+                    [
+                        new OpenApiSecuritySchemeReference(
+                            "Bearer",
+                            document)
+                    ] = []
+                });
         });
-        //builder.Services.AddSwaggerGen();
 
 
-        builder.Services.AddSwaggerGen();
-        //--------------PROVIDERS-----------------
-        builder.Services.AddScoped<IFilePathProvider, FilePathProvider>();
+        // ================= PROVIDERS =================
 
-        //======================Redis=====================
+        builder.Services.AddScoped<
+            IFilePathProvider,
+            FilePathProvider
+        >();
+
+
+        // ================= REDIS =================
+
         builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
-            var config = builder.Configuration.GetConnectionString("RedisServerConnection");
-            return ConnectionMultiplexer.Connect(config);
+            var config = configuration
+                .GetConnectionString("RedisServerConnection");
+
+            if (string.IsNullOrWhiteSpace(config))
+            {
+                throw new InvalidOperationException(
+                    "Redis connection string is not configured.");
+            }
+
+            return ConnectionMultiplexer.Connect(
+                config,
+                options =>
+                {
+                    options.AbortOnConnectFail = false;
+                });
         });
 
-        //--------------SERVICES-------------------
 
-        builder.Services.AddScoped<ICategoryService, CategoryService>();
-        builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddScoped<IProductService,  ProductService>();
-        builder.Services.AddScoped<IImageService, ImageService>();
-        builder.Services.AddSingleton<IHashHelper, HashHelper>();
-        builder.Services.AddScoped<IJWTService, JWTService>();
-        //builder.Services.AddSingleton<ICachingService, MemoryCachingService>();
-        builder.Services.AddSingleton<ICachingService, RedisCachingService>();
-        //Запускаємо RabbitMqReaderService як фонову службу
-        builder.Services.AddHostedService<RabbitMqReaderService>();
-        builder.Services.AddSingleton<IQueueService, RabbitMqService>();
+        // ================= APPLICATION SERVICES =================
+
+        builder.Services.AddScoped<
+            ICategoryService,
+            CategoryService
+        >();
+
+        builder.Services.AddScoped<
+            IAuthService,
+            AuthService
+        >();
+
+        builder.Services.AddScoped<
+            IProductService,
+            ProductService
+        >();
+
+        builder.Services.AddScoped<
+            IImageService,
+            ImageService
+        >();
+
+        builder.Services.AddSingleton<
+            IHashHelper,
+            HashHelper
+        >();
+
+        builder.Services.AddScoped<
+            IJWTService,
+            JWTService
+        >();
 
 
-        //===================CACHE=======================
+        // ================= ADMIN SEEDER =================
+
+        builder.Services.AddScoped<AdminSeeder>();
+
+
+        // ================= CACHE =================
+
         builder.Services.AddMemoryCache();
 
-        //--------------REPOSITORIES
-        builder.Services.AddScoped<IProductRepository, ProductRepository>();
-        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-        builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            //Правила перевірки токена
-            options.TokenValidationParameters = new TokenValidationParameters
+        builder.Services.AddSingleton<
+            ICachingService,
+            RedisCachingService
+        >();
+
+
+        // ================= RABBIT MQ =================
+
+        builder.Services.AddHostedService<
+            RabbitMqReaderService
+        >();
+
+        builder.Services.AddSingleton<
+            IQueueService,
+            RabbitMqService
+        >();
+
+
+        // ================= REPOSITORIES =================
+
+        builder.Services.AddScoped<
+            IProductRepository,
+            ProductRepository
+        >();
+
+        builder.Services.AddScoped<
+            ICategoryRepository,
+            CategoryRepository
+        >();
+
+        builder.Services.AddScoped<
+            IAuthRepository,
+            AuthRepository
+        >();
+
+        builder.Services.AddScoped<
+            IRefreshTokenRepository,
+            RefreshTokenRepository
+        >();
+
+
+        // ================= AUTHENTICATION =================
+
+        builder.Services
+            .AddAuthentication(options =>
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
+                options.DefaultAuthenticateScheme =
+                    JwtBearerDefaults.AuthenticationScheme;
 
-                ValidIssuer = jwtSettings.Issuer,
-                ValidAudience = jwtSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSettings.Key)
-                ),
+                options.DefaultChallengeScheme =
+                    JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
 
-                ClockSkew = TimeSpan.Zero
-            };
-        });
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(
+                                    jwtSettings.Key)
+                            ),
+
+                        ClockSkew = TimeSpan.Zero
+                    };
+            });
+
+
+        // ================= AUTHORIZATION =================
 
         builder.Services.AddAuthorization();
 
+
+        // ================= BUILD APP =================
+
         var app = builder.Build();
-       
+
+
+        // ================= DATABASE SEED =================
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var seeder = scope.ServiceProvider
+                .GetRequiredService<AdminSeeder>();
+
+            await seeder.SeedAsync();
+        }
+
+
+        // ================= MIDDLEWARE =================
+
         app.UseCors("AllowAll");
-        //app.UseCors("ProductionPolicy");
+
+
+        // ================= SWAGGER =================
 
         if (app.Environment.IsDevelopment())
         {
@@ -180,15 +297,28 @@ public class Program
         }
 
 
+        // ================= HTTPS =================
+
         app.UseHttpsRedirection();
+
+
+        // ================= AUTH =================
+
         app.UseAuthentication();
         app.UseAuthorization();
 
-        //app.UseMiddleware<RequestTimerMiddleware>();
+
+        // ================= STATIC FILES =================
+
         app.UseStaticFiles();
+
+
+        // ================= CONTROLLERS =================
+
         app.MapControllers();
-        
-       
+
+
+        // ================= RUN =================
 
         app.Run();
     }

@@ -22,14 +22,16 @@ public class RefreshTokenRepository(ShopDbContext _context) : IRefreshTokenRepos
         throw new NotImplementedException();
     }
 
-    public Task<RefreshToken?> GetByTokenAsync(string token)
+    public async Task<RefreshToken?> GetByTokenAsync(string token)
     {
-        throw new NotImplementedException();
+        return await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token);
     }
 
-    public Task UpdateAsync(RefreshToken refreshToken)
+    public async Task UpdateAsync(RefreshToken refreshToken)
     {
-        throw new NotImplementedException();
+        _context.RefreshTokens.Update(refreshToken);
+
+        await _context.SaveChangesAsync();
     }
     public async Task RevokeAllRefreshTokensAsync(Guid userId)
     {
