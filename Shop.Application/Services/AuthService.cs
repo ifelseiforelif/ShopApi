@@ -9,7 +9,13 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Shop.Application.Services;
-public class AuthService(IMapper _mapper, IAuthRepository _repository, IHashHelper _hashHelper, IJWTService _jwtService, IRefreshTokenRepository _refreshTokenRepository) : IAuthService
+public class AuthService(
+    IMapper _mapper, 
+    IAuthRepository _repository, 
+    IHashHelper _hashHelper, 
+    IJWTService _jwtService, 
+    IRefreshTokenRepository _refreshTokenRepository, 
+    IQueueService _queueService) : IAuthService
 {
     public async Task<(UserReadDTO? User, string? Token, string? RefreshToken)> RegisterAsync(UserCreateDTO dto)
     {
@@ -25,7 +31,7 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IHashHelp
               
                 var token = _jwtService.GenerateAccessToken(_mapper.Map<UserLoginDTO>(user), user.Role.ToString());
                 var refreshToken = _jwtService.GenerateRefreshToken();
-                _refreshTokenRepository.AddAsync(new RefreshToken
+                await _refreshTokenRepository.AddAsync(new RefreshToken
                 {
                     Token = refreshToken.Item1,
                     UserId = user.Id,
@@ -33,6 +39,7 @@ public class AuthService(IMapper _mapper, IAuthRepository _repository, IHashHelp
                     CreatedAt = DateTime.UtcNow,
                     ExpiresAt = DateTime.UtcNow.AddDays(refreshToken.Item2)
                 });
+                await _queueService.PublishAsync<UserCreateDTO>("Users",dto);
                 return (_mapper.Map<UserReadDTO>(registerUser), token, refreshToken.Item1);
             }
         }

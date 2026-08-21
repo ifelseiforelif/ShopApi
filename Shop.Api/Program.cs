@@ -128,6 +128,10 @@ public class Program
         builder.Services.AddScoped<IJWTService, JWTService>();
         //builder.Services.AddSingleton<ICachingService, MemoryCachingService>();
         builder.Services.AddSingleton<ICachingService, RedisCachingService>();
+        //Запускаємо RabbitMqReaderService як фонову службу
+        builder.Services.AddHostedService<RabbitMqReaderService>();
+        builder.Services.AddSingleton<IQueueService, RabbitMqService>();
+
 
         //===================CACHE=======================
         builder.Services.AddMemoryCache();
