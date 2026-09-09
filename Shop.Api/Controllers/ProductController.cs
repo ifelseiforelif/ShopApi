@@ -1,19 +1,31 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Products;
 using Shop.Application.DTOs.ProductDTOs;
 using Shop.Application.Interfaces.Services;
+using Shop.Application.Queries.Product;
 using Shop.Domain.Models;
 
 namespace Shop.Api.Controllers;
 //URL - Uniform Resource Locator - текстовий рядок, який вказує
 //на місце розташування ресурса
 
+/// <summary>
+/// Контролер по роботі з продуктами
+/// </summary>
+/// <param name="_productService"></param>
+/// <param name="_imageService"></param>
+/// <param name="_configuration"></param>
+/// <param name="_mediator"></param>
 [ApiController]
 [Route("api/v1/[controller]")]
 //[LogActionFilter]
-public class ProductController(IProductService _productService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
+public class ProductController(IProductService _productService, 
+    IImageService _imageService, 
+    IConfiguration _configuration, 
+    IMediator _mediator) : ControllerBase
 {
     /// <summary>Створити новий продукт разом із фотографіями</summary>
     /// <param name="dto">Дані продукту та файли зображень</param>
@@ -70,7 +82,8 @@ public class ProductController(IProductService _productService, IImageService _i
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById(int id)
     {
-        var product = await _productService.GetProductByIdAsync(id);
+        var product = await _mediator.Send(new GetProductByIdQuery(id));
+        //var product = await _productService.GetProductByIdAsync(id);
         if (product == null) return NotFound("Product not found");
 
         return Ok(product);

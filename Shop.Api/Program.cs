@@ -4,11 +4,13 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Shop.Api.Interfaces;
 using Shop.Api.Services;
+using Shop.Application;
 using Shop.Application.Interfaces.Configurations;
 using Shop.Application.Interfaces.Helpers;
 using Shop.Application.Interfaces.Repository;
 using Shop.Application.Interfaces.Services;
 using Shop.Application.Mapping;
+using Shop.Application.Queries.Product;
 using Shop.Application.Services;
 using Shop.Infrastructure.Configuration;
 using Shop.Infrastructure.Data;
@@ -78,6 +80,12 @@ public class Program
             });
         });
 
+        //==================MEDIATR======================
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly);
+
+        });
 
         // ================= CONTROLLERS =================
 
@@ -147,6 +155,16 @@ public class Program
         // ================= APPLICATION SERVICES =================
 
         builder.Services.AddScoped<
+         IImageService,
+         ImageService
+     >();
+
+        builder.Services.AddSingleton<
+            IHashHelper,
+            HashHelper
+        >();
+
+        builder.Services.AddScoped<
             ICategoryService,
             CategoryService
         >();
@@ -161,15 +179,7 @@ public class Program
             ProductService
         >();
 
-        builder.Services.AddScoped<
-            IImageService,
-            ImageService
-        >();
-
-        builder.Services.AddSingleton<
-            IHashHelper,
-            HashHelper
-        >();
+     
 
         builder.Services.AddScoped<
             IJWTService,
