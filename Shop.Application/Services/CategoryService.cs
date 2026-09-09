@@ -37,14 +37,14 @@ public class CategoryService(ICategoryRepository _repository, IMapper _mapper, I
         }
         return dto;
     }
-    public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync()
+    public async Task<List<CategoryReadDTO>?> GetAllCategoriesAsync(CancellationToken ct)
     {
         string keyCaching = "Categories";
         var cache = await _cachingService.GetAsync<List<CategoryReadDTO>>(keyCaching);
         if (cache == null)
         {
             Console.WriteLine("Reading from DB...");
-            List<Category>? categories = await _repository.GetAllCategoriesAsync();
+            List<Category>? categories = await _repository.GetAllCategoriesAsync(ct);
 
             if (categories != null && categories.Count > 0)
             {

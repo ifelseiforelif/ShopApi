@@ -21,9 +21,9 @@ public class CategoryRepository(ShopDbContext _context) : ICategoryRepository
             .Include(c => c.Products)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
-    public async Task<List<Category>?> GetAllCategoriesAsync()
+    public async Task<List<Category>?> GetAllCategoriesAsync(CancellationToken ct)
     {
-        return await _context.Categories.ToListAsync();
+        return await _context.Categories.ToListAsync(ct);
 
     }
 

@@ -10,7 +10,7 @@ public interface ICategoryRepository
 
     Task<Category?> GetCategoryBySlugAsync(string slug);
 
-    Task<List<Category>?> GetAllCategoriesAsync();
+    Task<List<Category>?> GetAllCategoriesAsync(CancellationToken ct);
 
     Task<List<Category>?> GetCategoriesByParentIdAsync(int id);
 }

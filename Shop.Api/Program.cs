@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Shop.Api.Interfaces;
+using Shop.Api.Middlewares;
 using Shop.Api.Services;
 using Shop.Application;
 using Shop.Application.Interfaces.Configurations;
@@ -297,6 +298,7 @@ public class Program
 
         app.UseCors("AllowAll");
 
+        app.UseMiddleware<CancellationTokenHandleMiddleware>();
 
         // ================= SWAGGER =================
 
@@ -322,6 +324,7 @@ public class Program
 
         app.UseStaticFiles();
 
+       
 
         // ================= CONTROLLERS =================
 

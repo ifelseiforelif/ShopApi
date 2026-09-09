@@ -71,9 +71,9 @@ public class CategoryController(ICategoryService _categoryService, IImageService
 
     //[Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAllCategories()
+    public async Task<IActionResult> GetAllCategories(CancellationToken ct)
     {
-        List<CategoryReadDTO>? categories = await _categoryService.GetAllCategoriesAsync();
+        List<CategoryReadDTO>? categories = await _categoryService.GetAllCategoriesAsync(ct);
         if(categories== null || categories.Count == 0)
         {
             return NotFound();

@@ -9,7 +9,7 @@ public interface ICategoryService
     Task<CategoryReadDTO?> GetCategoryByIdAsync(int id);
 
     Task<CategoryReadDTO?> GetCategoryBySlugAsync(string slug);
-    Task<List<CategoryReadDTO>?> GetAllCategoriesAsync();
+    Task<List<CategoryReadDTO>?> GetAllCategoriesAsync(CancellationToken ct);
 
     Task<List<CategoryReadDTO>?> GetAllCategoriesByParentIdAsync(int id);
 
