@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -29,20 +30,18 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        var configuration = builder.Configuration;
 
         // ================= DATABASE =================
 
         builder.Services.AddDbContext<ShopDbContext>(options =>
         {
             options.UseSqlServer(
-                builder.Configuration.GetConnectionString(
-                    "SqlServerConnection"));
+                configuration.GetConnectionString("SqlServerConnection"));
         });
 
 
         // ================= JWT SETTINGS =================
-
-        var configuration = builder.Configuration;
 
         var jwtSettings = configuration
             .GetSection("Jwt")
@@ -51,6 +50,48 @@ public class Program
 
         builder.Services.Configure<JwtSettings>(
             configuration.GetSection("Jwt"));
+
+
+        // ================= AUTHENTICATION (JWT + COOKIES + GOOGLE) =================
+
+        builder.Services
+            .AddAuthentication(options =>
+            {
+                // Для стандартних API-запитів використовуємо JWT
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings.Key)
+                    ),
+
+                    ClockSkew = TimeSpan.Zero
+                };
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme) // Потрібно для зберігання стану OAuth
+            .AddGoogle(options =>
+            {
+                options.ClientId = configuration["Authentication:Google:ClientId"]!;
+                options.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            });
+
+
+        // ================= AUTHORIZATION =================
+
+        builder.Services.AddAuthorization();
 
 
         // ================= RABBIT MQ SETTINGS =================
@@ -81,17 +122,18 @@ public class Program
             });
         });
 
-        //==================MEDIATR======================
+
+        // ================= MEDIATR =================
+
         builder.Services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly);
-
         });
+
 
         // ================= CONTROLLERS =================
 
         builder.Services.AddControllers();
-
         builder.Services.AddEndpointsApiExplorer();
 
 
@@ -125,18 +167,14 @@ public class Program
 
         // ================= PROVIDERS =================
 
-        builder.Services.AddScoped<
-            IFilePathProvider,
-            FilePathProvider
-        >();
+        builder.Services.AddScoped<IFilePathProvider, FilePathProvider>();
 
 
         // ================= REDIS =================
 
         builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
-            var config = configuration
-                .GetConnectionString("RedisServerConnection");
+            var config = configuration.GetConnectionString("RedisServerConnection");
 
             if (string.IsNullOrWhiteSpace(config))
             {
@@ -155,37 +193,12 @@ public class Program
 
         // ================= APPLICATION SERVICES =================
 
-        builder.Services.AddScoped<
-         IImageService,
-         ImageService
-     >();
-
-        builder.Services.AddSingleton<
-            IHashHelper,
-            HashHelper
-        >();
-
-        builder.Services.AddScoped<
-            ICategoryService,
-            CategoryService
-        >();
-
-        builder.Services.AddScoped<
-            IAuthService,
-            AuthService
-        >();
-
-        builder.Services.AddScoped<
-            IProductService,
-            ProductService
-        >();
-
-     
-
-        builder.Services.AddScoped<
-            IJWTService,
-            JWTService
-        >();
+        builder.Services.AddScoped<IImageService, ImageService>();
+        builder.Services.AddSingleton<IHashHelper, HashHelper>();
+        builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<IJWTService, JWTService>();
 
 
         // ================= ADMIN SEEDER =================
@@ -196,86 +209,21 @@ public class Program
         // ================= CACHE =================
 
         builder.Services.AddMemoryCache();
-
-        builder.Services.AddSingleton<
-            ICachingService,
-            RedisCachingService
-        >();
+        builder.Services.AddSingleton<ICachingService, RedisCachingService>();
 
 
         // ================= RABBIT MQ =================
 
-        builder.Services.AddHostedService<
-            RabbitMqReaderService
-        >();
-
-        builder.Services.AddSingleton<
-            IQueueService,
-            RabbitMqService
-        >();
+        builder.Services.AddHostedService<RabbitMqReaderService>();
+        builder.Services.AddSingleton<IQueueService, RabbitMqService>();
 
 
         // ================= REPOSITORIES =================
 
-        builder.Services.AddScoped<
-            IProductRepository,
-            ProductRepository
-        >();
-
-        builder.Services.AddScoped<
-            ICategoryRepository,
-            CategoryRepository
-        >();
-
-        builder.Services.AddScoped<
-            IAuthRepository,
-            AuthRepository
-        >();
-
-        builder.Services.AddScoped<
-            IRefreshTokenRepository,
-            RefreshTokenRepository
-        >();
-
-
-        // ================= AUTHENTICATION =================
-
-        builder.Services
-            .AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme =
-                    JwtBearerDefaults.AuthenticationScheme;
-
-                options.DefaultChallengeScheme =
-                    JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters =
-                    new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
-
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(
-                                    jwtSettings.Key)
-                            ),
-
-                        ClockSkew = TimeSpan.Zero
-                    };
-            });
-
-
-        // ================= AUTHORIZATION =================
-
-        builder.Services.AddAuthorization();
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
+        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+        builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 
         // ================= BUILD APP =================
@@ -287,9 +235,7 @@ public class Program
 
         using (var scope = app.Services.CreateScope())
         {
-            var seeder = scope.ServiceProvider
-                .GetRequiredService<AdminSeeder>();
-
+            var seeder = scope.ServiceProvider.GetRequiredService<AdminSeeder>();
             await seeder.SeedAsync();
         }
 
@@ -324,7 +270,6 @@ public class Program
 
         app.UseStaticFiles();
 
-       
 
         // ================= CONTROLLERS =================
 
