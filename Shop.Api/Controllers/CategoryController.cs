@@ -1,21 +1,35 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Api.Interfaces;
 using Shop.Api.Requests.Categories;
 using Shop.Application.DTOs.CategoryDTOs;
 using Shop.Application.Interfaces.Services;
+using Shop.Application.Validators.Category;
 
 namespace Shop.Api.Controllers;
 
 
 [ApiController]
 [Route("api/v1/[controller]")] //https://ip:port/api/v1
-public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration) : ControllerBase
+public class CategoryController(ICategoryService _categoryService, IImageService _imageService, IConfiguration _configuration, IValidator<CategoryCreateDTO> _validator) : ControllerBase
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> CreateCategory([FromForm] CategoryCreateRequest dto)
     {
+        //var createBookDto = new CategoryCreateDTO
+        //{
+        //    Name = dto.Name,
+        //    Slug = dto.Slug,
+        //    ParentId = dto.ParentId,
+        //    Url = dto.Url
+        //};
+        //var result = await _validator.ValidateAsync(createBookDto);
+        //if (!result.IsValid)
+        //{
+        //    return BadRequest(result.Errors);
+        //}
         if (dto.Image != null)
         {
             dto.Url = (await _imageService.SaveFileAsync(dto.Image, _configuration["DirnameForFiles:Categories"])) ?? string.Empty;

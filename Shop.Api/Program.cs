@@ -1,8 +1,10 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Shop.Api.Filters;
 using Shop.Api.Interfaces;
 using Shop.Api.Middlewares;
 using Shop.Api.Services;
@@ -14,6 +16,7 @@ using Shop.Application.Interfaces.Services;
 using Shop.Application.Mapping;
 using Shop.Application.Queries.Product;
 using Shop.Application.Services;
+using Shop.Application.Validators.Category;
 using Shop.Infrastructure.Configuration;
 using Shop.Infrastructure.Data;
 using Shop.Infrastructure.Helpers;
@@ -30,6 +33,16 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddScoped<ValidationFilter>();
+
+        builder.Services.AddControllers(options =>
+        {
+            options.Filters.Add<ValidationFilter>();
+        });
+        //======================VALIDATORS=================
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryValidator>();
+
+ 
         var configuration = builder.Configuration;
 
         // ================= DATABASE =================

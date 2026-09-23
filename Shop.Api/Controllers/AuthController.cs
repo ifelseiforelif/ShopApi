@@ -47,7 +47,7 @@ public class AuthController(IAuthService _authService):ControllerBase
         // Тут зазвичай виконується:
         // 1. Пошук користувача в БД за email/providerId.
         // 2. Реєстрація нового користувача, якщо його немає.
-        // 3. Генерація власного JWT (якщо це SPA / Mobile) або встановлення локальної сесії.
+        // 3. Генерація власного JWT  (refresh and access)
 
         return Ok(new { Name = name, Email = email, ProviderId = providerId });
     }
